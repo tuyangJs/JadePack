@@ -1804,7 +1804,7 @@ SectionEnd"#, installer_file = installer_file, min_version_check = min_version_c
 
     let (install_dir_line, scope_includes, scope_oninit_body, request_level, uninstall_oninit, install_mode_page) = match options.install_scope.as_str() {
         "perUser" => (
-            String::new(),
+            "InstallDir \"$LOCALAPPDATA\\${PRODUCTNAME}\"".to_string(),
             format!("!define MULTIUSER_EXECUTIONLEVEL User\n!define MULTIUSER_INSTALLMODE_INSTDIR \"{install_dir}\"\n!include \"MultiUser.nsh\""),
             "  !insertmacro MULTIUSER_INIT\n  !insertmacro SetContext\n".to_string(),
             "user",
@@ -1812,7 +1812,7 @@ SectionEnd"#, installer_file = installer_file, min_version_check = min_version_c
             String::new(),
         ),
         "both" => (
-            String::new(),
+            "InstallDir \"$LOCALAPPDATA\\${PRODUCTNAME}\"".to_string(),
             format!(
 "!define MULTIUSER_MUI
 !define MULTIUSER_EXECUTIONLEVEL Highest
@@ -1827,7 +1827,7 @@ SectionEnd"#, installer_file = installer_file, min_version_check = min_version_c
             "  !insertmacro MULTIUSER_INIT\n  !insertmacro SetContext\n".to_string(),
             "highest",
             "  !insertmacro MULTIUSER_UNINIT\n  !insertmacro SetContext\n".to_string(),
-            "!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfUpgrade\n!insertmacro MULTIUSER_PAGE_INSTALLMODE\n".to_string(),
+            "!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive\n!insertmacro MULTIUSER_PAGE_INSTALLMODE\n".to_string(),
         ),
         _ => (
             format!("InstallDir \"$PROGRAMFILES\\{install_dir}\""),
@@ -1850,12 +1850,6 @@ SectionEnd"#, installer_file = installer_file, min_version_check = min_version_c
         langdll_display = langdll_display,
     );
 
-    let oninit_section = if oninit_body.trim().is_empty() {
-        "Function .onInit\n  Call .onInitUpgradeCheck\nFunctionEnd\n".to_string()
-    } else {
-        format!("Function .onInit\n{oninit_body}  Call .onInitUpgradeCheck\nFunctionEnd\n", oninit_body = oninit_body)
-    };
-
     let template_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("nsis")
         .join("installer.nsi");
@@ -1877,7 +1871,7 @@ SectionEnd"#, installer_file = installer_file, min_version_check = min_version_c
     template = template.replace("{{webview2_section}}", &webview2_section);
     template = template.replace("{{file_entries}}", &file_entries);
     template = template.replace("{{uninit_body}}", &uninstall_oninit);
-    template = template.replace("{{oninit_section}}", &oninit_section);
+    template = template.replace("{{oninit_body}}", &oninit_body);
     template = template.replace("{{install_scope}}", &options.install_scope);
 
     let compression_directive = match options.compression_level {
