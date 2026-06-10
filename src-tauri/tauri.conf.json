@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "JadePack",
+  "version": "2.1.5",
+  "identifier": "com.ihanl.jadepack",
+  "build": {
+    "beforeDevCommand": "bun run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "bun run build",
+    "frontendDist": "../dist"
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["jadepack"]
+      }
+    },
+    "updater": {
+      "endpoints": [
+        "https://store.jade.run/api/app/update/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNGMTEwRkRFQkE2OTlDQkIKUldTN25HbTYzZzhSUCt6OGtjM0Y5c0IvTUpBQy9NN0QyS2tkS2tEZ0FjNzFqbGtGY3B6alR0dFkK"
+    }
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "JadePack",
+        
+        "width": 986,
+        "height": 692
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "nsis",
+    "resources": [
+      "nsis",
+      "icons/setup.ico"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "languages": ["SimpChinese", "English"]
+      }
+    }
+  }
+}

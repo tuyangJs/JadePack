@@ -1,0 +1,54 @@
+[package]
+name = "jadepack"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# 默认服务器配置 (可编译时覆盖)
+# 开发环境: RUSTFLAGS="--env JADEPACK_DEFAULT_API_BASE=http://172.22.208.1:3000/" cargo build
+# 或者在 .cargo/config.toml 中配置
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "jadepack_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+asar = { version = "0.3.0", features = ["write"] }
+walkdir = "2"
+globset = "0.4"
+tauri-plugin-deep-link = "2.4.8"
+tauri-plugin-single-instance = { version = "2.4.1", features = ["deep-link"] }
+tauri-plugin-updater = "2"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+
+# 加密相关
+aes-gcm = "0.10"
+hkdf = "0.12"
+sha2 = "0.10"
+ed25519-dalek = { version = "2.0", features = ["rand_core"] }
+rand = "0.8"
+base64 = "0.21"
+pelite = "0.10"
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
+debug = false
+debug-assertions = false
+overflow-checks = false
+
