@@ -125,7 +125,7 @@ function BuildCenterPage(props) {
     if (!nsisOptions.appDir) nsisErrors.appDir = true;
     if (!nsisOptions.mainExe) nsisErrors.mainExe = true;
     if (!nsisOptions.appName) nsisErrors.appName = true;
-    if (!nsisOptions.appVersion) nsisErrors.appVersion = true;
+    if (!nsisOptions.appVersion && nsisOptions.versionMode !== "follow") nsisErrors.appVersion = true;
     if (!nsisOptions.appId) nsisErrors.appId = true;
     if (!nsisOptions.outputDir) nsisErrors.outputDir = true;
     setNsisFieldErrors(nsisErrors);
@@ -138,7 +138,7 @@ function BuildCenterPage(props) {
       return;
     }
     await saveCurrentConfig(false);
-    buildNsisInstaller();
+    await buildNsisInstaller();
   };
 
   const updateNsisField = (field, value) => {

@@ -1496,19 +1496,42 @@ async fn fetch_webview2_versions() -> Result<Vec<Webview2Version>, String> {
 #[tauri::command]
 async fn read_exe_version(exe_path: String) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        use pelite::pe64::Pe;
         let data = std::fs::read(&exe_path).map_err(|e| format!("读取文件失败: {}", e))?;
-        let pe = pelite::pe64::PeFile::from_bytes(&data)
-            .map_err(|e| format!("解析 PE 失败: {}", e))?;
-        let resources = pe.resources()
-            .map_err(|e| format!("读取资源失败: {}", e))?;
-        let version_info = resources.version_info()
-            .map_err(|e| format!("读取版本信息失败: {}", e))?;
-        let fixed = version_info.fixed()
-            .ok_or_else(|| "无固定版本信息".to_string())?;
-        let fv = &fixed.dwFileVersion;
+        let fv = match read_version_from_pe(&data) {
+            Ok(v) => v,
+            Err(_) => {
+                // pe32 失败，尝试 pe64
+                read_version_from_pe64(&data)?
+            }
+        };
         Ok(format!("{}.{}.{}.{}", fv.Major, fv.Minor, fv.Build, fv.Patch))
     }).await.map_err(|e| format!("任务执行失败: {}", e))?
+}
+
+fn read_version_from_pe(data: &[u8]) -> Result<pelite::image::VS_VERSION, String> {
+    use pelite::pe32::Pe;
+    let pe = pelite::pe32::PeFile::from_bytes(data)
+        .map_err(|e| format!("{}", e))?;
+    let resources = pe.resources()
+        .map_err(|e| format!("{}", e))?;
+    let version_info = resources.version_info()
+        .map_err(|e| format!("{}", e))?;
+    let fixed = version_info.fixed()
+        .ok_or_else(|| "无固定版本信息".to_string())?;
+    Ok(fixed.dwFileVersion)
+}
+
+fn read_version_from_pe64(data: &[u8]) -> Result<pelite::image::VS_VERSION, String> {
+    use pelite::pe64::Pe;
+    let pe = pelite::pe64::PeFile::from_bytes(data)
+        .map_err(|e| format!("{}", e))?;
+    let resources = pe.resources()
+        .map_err(|e| format!("{}", e))?;
+    let version_info = resources.version_info()
+        .map_err(|e| format!("{}", e))?;
+    let fixed = version_info.fixed()
+        .ok_or_else(|| "无固定版本信息".to_string())?;
+    Ok(fixed.dwFileVersion)
 }
 
 #[tauri::command]

@@ -378,9 +378,12 @@ export function useBuildWorkspace({ accessToken, addLog, onUnauthorized }) {
       try {
         const sep = nsisOptions.appDir.includes("\\") ? "\\" : "/";
         const exePath = nsisOptions.appDir + sep + nsisOptions.mainExe;
+        appendLog("info", `正在读取主程序版本: ${exePath}`);
         resolvedVersion = await invoke("read_exe_version", { exePath });
+        appendLog("info", `读取到版本号: ${resolvedVersion}`);
         setNsisOptions((prev) => ({ ...prev, appVersion: resolvedVersion }));
       } catch (e) {
+        appendLog("error", `读取主程序版本号失败: ${String(e)}`);
         toast.warning("读取主程序版本号失败: " + String(e));
         return;
       }
@@ -410,7 +413,7 @@ export function useBuildWorkspace({ accessToken, addLog, onUnauthorized }) {
         outputFile,
         accessToken: accessToken || null,
         packOptions: { includeHidden, followSymlinks, sortByPath, unpackPatterns },
-        nsisOptions,
+        nsisOptions: { ...nsisOptions, appVersion: resolvedVersion },
         configDir: configPath ? configPath.substring(0, configPath.lastIndexOf("\\") || configPath.lastIndexOf("/")) : "",
       });
 
