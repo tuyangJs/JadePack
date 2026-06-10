@@ -1504,7 +1504,7 @@ async fn read_exe_version(exe_path: String) -> Result<String, String> {
                 read_version_from_pe64(&data)?
             }
         };
-        Ok(format!("{}.{}.{}.{}", fv.Major, fv.Minor, fv.Build, fv.Patch))
+        Ok(format!("{}.{}.{}.{}", fv.Major, fv.Minor, fv.Patch, fv.Build))
     }).await.map_err(|e| format!("任务执行失败: {}", e))?
 }
 
